@@ -87,15 +87,16 @@ void lmFree_inner(loom_allocator_t *allocator, void *ptr, const char *file, int 
 
 void *lmRealloc_inner(loom_allocator_t *allocator, void *ptr, size_t size, const char *file, int line)
 {
-    void *obj = NULL;
+   void *obj = NULL;
+   if(!allocator) allocator = loom_allocator_getGlobalHeap();
 
-    if (!allocator)
-    {
-        allocator = loom_allocator_getGlobalHeap();
-    }
-    obj = allocator->reallocCall(allocator, ptr, size, file, line);
-    tmAllocEx(gTelemetryContext, file, line, ptr, size, "lmRealloc");
-    return obj;
+   if(ptr == NULL)
+      obj = allocator->allocCall(allocator, size, file, line);
+   else
+      obj = allocator->reallocCall(allocator, ptr, size, file, line);
+
+   tmAllocEx(gTelemetryContext, file, line, ptr, size, "lmRealloc");
+   return obj;
 }
 
 

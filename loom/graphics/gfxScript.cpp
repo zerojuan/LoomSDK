@@ -46,8 +46,8 @@ namespace GFX
  */
 struct RescaleEventStatus
 {
-    utString path;
-    float    progress;
+    utString path, assetPath;
+    float progress;
 };
 
 struct RescaleNote
@@ -84,7 +84,7 @@ static void pollScaling()
         // Flush the asset (only works on main thread atm)
         if (curItem.progress == 1.0f)
         {
-            loom_asset_flush(curItem.path.c_str());
+            loom_asset_flush(curItem.assetPath.c_str());
         }
 
         gEventQueue.pop_front();
@@ -93,8 +93,7 @@ static void pollScaling()
     loom_mutex_unlock(gEventQueueMutex);
 }
 
-
-static void postResampleEvent(const char *path, float progress)
+static void postResampleEvent(const char *path, float progress, const char *assetPath)
 {
     if (gEventQueueMutex == NULL)
     {
@@ -104,7 +103,8 @@ static void postResampleEvent(const char *path, float progress)
     loom_mutex_lock(gEventQueueMutex);
 
     RescaleEventStatus res;
-    res.path     = path;
+    res.path = path;
+    res.assetPath = assetPath;
     res.progress = progress;
     gEventQueue.push_back(res);
 
@@ -128,10 +128,10 @@ static int __stdcall scaleImageOnDisk_body(void *param)
     loom_asset_image *lai = NULL;
 
     // Load async since we're in a background thread.
-    while ((lai = (loom_asset_image *)loom_asset_lock(inPath, LATImage, 0)) == NULL)
-    {
+    loom_asset_preload(inPath);
+    loom_thread_yield();
+    while((lai = (loom_asset_image *)loom_asset_lock(inPath, LATImage, 0)) == NULL)
         loom_thread_yield();
-    }
 
     int     imageX     = lai->width;
     int     imageY     = lai->height;
@@ -164,11 +164,13 @@ static int __stdcall scaleImageOnDisk_body(void *param)
     stbi_uc *outBuffer = (stbi_uc *)malloc(sizeof(stbi_uc) * 3 * (outWidth + 1) * (outHeight + 1));
 
     // Set up the resamplers, reusing filter constants.
-    const char *pFilter     = "blackman";
-    float      filter_scale = 1.0;
-    Resampler  resizeR(imageX, imageY, outWidth, outHeight, Resampler::BOUNDARY_CLAMP, 0.0f, 1.0f, pFilter, NULL, NULL, filter_scale, filter_scale);
-    Resampler  resizeG(imageX, imageY, outWidth, outHeight, Resampler::BOUNDARY_CLAMP, 0.0f, 1.0f, pFilter, resizeR.get_clist_x(), resizeR.get_clist_y(), filter_scale, filter_scale);
-    Resampler  resizeB(imageX, imageY, outWidth, outHeight, Resampler::BOUNDARY_CLAMP, 0.0f, 1.0f, pFilter, resizeR.get_clist_x(), resizeR.get_clist_y(), filter_scale, filter_scale);
+    const char *pFilter = "blackman";
+    float filter_scale = 1.0;
+    Resampler resizeR(imageX, imageY, outWidth, outHeight, Resampler::BOUNDARY_CLAMP, 0.0f, 1.0f, pFilter, NULL, NULL, filter_scale, filter_scale);
+    Resampler resizeG(imageX, imageY, outWidth, outHeight, Resampler::BOUNDARY_CLAMP, 0.0f, 1.0f, pFilter,
+                      resizeR.get_clist_x(), resizeR.get_clist_y(), filter_scale, filter_scale);
+    Resampler resizeB(imageX, imageY, outWidth, outHeight, Resampler::BOUNDARY_CLAMP, 0.0f, 1.0f, pFilter,
+                      resizeR.get_clist_x(), resizeR.get_clist_y(), filter_scale, filter_scale);
 
     int resultY = 0;
 
@@ -220,10 +222,8 @@ static int __stdcall scaleImageOnDisk_body(void *param)
             }
 
             // Every hundred lines post an update.
-            if (resultY % 100 == 0)
-            {
-                postResampleEvent(outPath, (float)resultY / (float)outHeight);
-            }
+            if(resultY % 100 == 0)
+                postResampleEvent(outPath, (float)resultY / (float)outHeight, inPath);
         }
     }
 
@@ -234,15 +234,17 @@ static int __stdcall scaleImageOnDisk_body(void *param)
     jpge::compress_image_to_jpeg_file(outPath, outWidth, outHeight, 3, outBuffer);
     lmLog(gGFXTextureLogGroup, "JPEG output took %dms", t3 - platform_getMilliseconds());
 
-    // Post completion event.
-    postResampleEvent(outPath, 1.0);
-
     // Free everything!
     loom_asset_unlock(inPath);
+
     free(buffRed);
     free(buffGreen);
     free(buffBlue);
     free(outBuffer);
+
+    // Post completion event.
+    postResampleEvent(outPath, 1.0, inPath);
+
     delete rn;
 
     return 0;
