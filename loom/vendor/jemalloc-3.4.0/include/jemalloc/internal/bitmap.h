@@ -118,6 +118,16 @@ bitmap_set(bitmap_t *bitmap, const bitmap_info_t *binfo, size_t bit)
 	}
 }
 
+
+#if LOOM_PLATFORM == LOOM_PLATFORM_ANDROID
+static int ffsl(long x)
+{
+	if(x == 0)
+		return 0;
+	return __builtin_clz(x)+1;
+}
+#endif
+
 /* sfu: set first unset. */
 JEMALLOC_INLINE size_t
 bitmap_sfu(bitmap_t *bitmap, const bitmap_info_t *binfo)

@@ -703,12 +703,14 @@ malloc_init_hard(void)
 #if (!defined(JEMALLOC_MUTEX_INIT_CB) && !defined(JEMALLOC_ZONE) \
     && !defined(_WIN32))
 	/* Register fork handlers. */
+#if 0
 	if (pthread_atfork(jemalloc_prefork, jemalloc_postfork_parent,
 	    jemalloc_postfork_child) != 0) {
 		malloc_write("<jemalloc>: Error in pthread_atfork()\n");
 		if (opt_abort)
 			abort();
 	}
+#endif
 #endif
 
 	if (opt_stats_print) {
