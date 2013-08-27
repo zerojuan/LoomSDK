@@ -63,13 +63,30 @@ struct stackinfo
 static utStack<stackinfo> _tracestack;
 static char               _tracemessage[2048];
 
+#include "jemalloc/jemalloc.h"
+static void *lsLuaAlloc(void *ud, void *ptr, size_t osize, size_t nsize)
+{
+    (void)ud;  (void)osize;  /* not used */
+    if (nsize == 0 && ptr) 
+    {
+        je_free(ptr);
+        return NULL;
+    }
+    else
+    {
+        if(osize == 0)
+            return je_malloc(nsize);
+        else
+            return je_realloc(ptr, nsize);
+    }
+}
 
 void LSLuaState::open()
 {
     assert(!L);
 
-    L = lua_open();
-
+    L = lua_newstate(lsLuaAlloc, NULL);
+    //L = lua_open();
     toLuaState.insert(L, this);
 
     luaopen_base(L);

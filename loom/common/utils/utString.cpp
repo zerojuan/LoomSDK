@@ -36,9 +36,8 @@ const utString::size_type utString::npos = static_cast<size_t>(-1);
  * return NULL.  Loop until there is free memory.
  *
  */
-static char *malloc_never_null(const size_t b)
-{
-    char *p;
+static char* malloc_never_null(const size_t b) {
+    char *p = NULL;
 
     do
     {
