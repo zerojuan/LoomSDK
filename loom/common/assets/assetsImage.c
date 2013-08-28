@@ -84,7 +84,7 @@ int loom_asset_identifyImage(const char *extension)
 void loom_asset_imageDtor(void *bits)
 {
     loom_asset_image_t *img = (loom_asset_image_t*)bits;
-    free(img->bits);
+    lmFree(gAssetAllocator, img->bits);
     lmFree(gAssetAllocator, bits);
 }
 

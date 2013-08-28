@@ -187,7 +187,7 @@ bool ByteCode::load(LSLuaState *ls, bool execute)
 
     lua_State *L = ls->VM();
 
-    char *buffer = (char *)malloc(bc.size());
+    char* buffer = (char *) lmAlloc(bc.size());
 
     for (UTsize i = 0; i < bc.size(); i++)
     {

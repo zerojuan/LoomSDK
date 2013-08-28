@@ -21,19 +21,22 @@
 #include "lsFile.h"
 #include "lsError.h"
 #include "loom/common/core/assert.h"
+#include "loom/common/core/allocator.h"
 #include "utils/utStreams.h"
 
 namespace LS {
 static MapFileFunction   MapFileFunc   = NULL;
 static UnmapFileFunction UnmapFileFunc = NULL;
 
-#define MAX_NOTES    8
+loom_allocator_t *gScriptFileAllocator = NULL;
+    
+#define MAX_NOTES 8
+
 struct FileNote
 {
     char path[1024];
     void *ptr;
-}
-notes[MAX_NOTES];
+} notes[MAX_NOTES];
 
 void LSFileInitialize(MapFileFunction mapFunc, UnmapFileFunction unmapFunc)
 {
@@ -71,7 +74,11 @@ void LSMapFile(const char *path, void **outPointer, long *outSize)
     }
 
     // TODO: external memory API, woot
+<<<<<<< HEAD
     char *buffer = (char *)malloc(sz);
+=======
+    char* buffer = (char *) lmAlloc(gScriptFileAllocator, sz);
+>>>>>>> Converted malloc/free to lmAlloc/lmFree.
     fs.read(buffer, sz);
 
     *outPointer = buffer;
@@ -118,8 +125,13 @@ void LSUnmapFile(const char *ptr)
             continue;
         }
 
+<<<<<<< HEAD
         free(notes[i].ptr);
         notes[i].ptr     = NULL;
+=======
+        lmFree(gScriptFileAllocator, notes[i].ptr);
+        notes[i].ptr = NULL;
+>>>>>>> Converted malloc/free to lmAlloc/lmFree.
         notes[i].path[0] = 0;
         foundSlot        = true;
         break;

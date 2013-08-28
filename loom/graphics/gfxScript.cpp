@@ -32,10 +32,12 @@
 #include "loom/vendor/geldreich/resampler.h"
 #include "loom/vendor/stb/stb_image.h"
 
+#include "loom/common/core/allocator.h"
 #include "loom/common/assets/assets.h"
 #include "loom/common/assets/assetsImage.h"
 
 lmDeclareLogGroup(gGFXTextureLogGroup);
+loom_allocator_t *gRescalerAllocator = NULL;
 
 namespace GFX
 {
@@ -155,13 +157,13 @@ static int __stdcall scaleImageOnDisk_body(void *param)
     }
 
     // Build a buffer for byte->float conversions...
-    Resampler::Sample *buffRed   = (Resampler::Sample *)malloc(sizeof(Resampler::Sample) * imageX);
-    Resampler::Sample *buffGreen = (Resampler::Sample *)malloc(sizeof(Resampler::Sample) * imageX);
-    Resampler::Sample *buffBlue  = (Resampler::Sample *)malloc(sizeof(Resampler::Sample) * imageX);
+    Resampler::Sample *buffRed   = (Resampler::Sample *)lmAlloc(gRescalerAllocator, sizeof(Resampler::Sample) * imageX);
+    Resampler::Sample *buffGreen = (Resampler::Sample *)lmAlloc(gRescalerAllocator, sizeof(Resampler::Sample) * imageX);
+    Resampler::Sample *buffBlue  = (Resampler::Sample *)lmAlloc(gRescalerAllocator, sizeof(Resampler::Sample) * imageX);
 
     // And the downsampled image. Give a slight margin because the scaling routine above can give
     // up to outWidth inclusive as an output value.
-    stbi_uc *outBuffer = (stbi_uc *)malloc(sizeof(stbi_uc) * 3 * (outWidth + 1) * (outHeight + 1));
+    stbi_uc *outBuffer = (stbi_uc*)lmAlloc(gRescalerAllocator, sizeof(stbi_uc) * 3 * (outWidth+1) * (outHeight+1));
 
     // Set up the resamplers, reusing filter constants.
     const char *pFilter = "blackman";
@@ -237,10 +239,10 @@ static int __stdcall scaleImageOnDisk_body(void *param)
     // Free everything!
     loom_asset_unlock(inPath);
 
-    free(buffRed);
-    free(buffGreen);
-    free(buffBlue);
-    free(outBuffer);
+    lmFree(gRescalerAllocator, buffRed);
+    lmFree(gRescalerAllocator, buffGreen);
+    lmFree(gRescalerAllocator, buffBlue);
+    lmFree(gRescalerAllocator, outBuffer);
 
     // Post completion event.
     postResampleEvent(outPath, 1.0, inPath);

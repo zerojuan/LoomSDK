@@ -27,7 +27,9 @@
 #include "loom/common/core/performance.h"
 #include "loom/common/platform/platformThread.h"
 
-// This is our alignment size for general allocations. When we need to
+#include "jemalloc/jemalloc.h"
+
+// This is our alignment size for general allocations. When we need to 
 // pre-post pad data on an allocation, we'll use this many bytes to move
 // fore/back.
 #define LOOM_ALLOCATOR_ALIGNMENT    16
@@ -120,19 +122,19 @@ void loom_allocator_destroy(loom_allocator_t *allocator)
 
 static void *loom_heapAlloc_alloc(loom_allocator_t *thiz, size_t size, const char *file, int line)
 {
-    return malloc(size);
+   return je_malloc(size);
 }
 
 
 static void loom_heapAlloc_free(loom_allocator_t *thiz, void *ptr, const char *file, int line)
 {
-    free(ptr);
+   je_free(ptr);
 }
 
 
 static void *loom_heapAlloc_realloc(loom_allocator_t *thiz, void *ptr, size_t size, const char *file, int line)
 {
-    return realloc(ptr, size);
+   return je_realloc(ptr, size);
 }
 
 

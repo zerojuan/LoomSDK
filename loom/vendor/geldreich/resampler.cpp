@@ -16,6 +16,9 @@
 #include <string.h>
 #include "resampler.h"
 
+#include "loom/common/core/allocator.h"
+loom_allocator_t *gResamplerAllocator = NULL;
+
 #define resampler_assert assert
 
 static inline int resampler_range_check(int v, int h) { (void)h; resampler_assert((v >= 0) && (v < h)); return v; }
@@ -873,7 +876,7 @@ bool Resampler::put_line(const Sample* Psrc)
 
    if (!m_Pscan_buf->scan_buf_l[i])
    {
-      if ((m_Pscan_buf->scan_buf_l[i] = (Sample*)malloc(m_intermediate_x * sizeof(Sample))) == NULL)
+      if ((m_Pscan_buf->scan_buf_l[i] = (Sample*)lmAlloc(gResamplerAllocator, m_intermediate_x * sizeof(Sample))) == NULL)
       {
          m_status = STATUS_OUT_OF_MEMORY;
          return false;
@@ -1078,7 +1081,7 @@ Resampler::Resampler(int src_x, int src_y,
 
    m_boundary_op = boundary_op;
 
-   if ((m_Pdst_buf = (Sample*)malloc(m_resample_dst_x * sizeof(Sample))) == NULL)
+   if ((m_Pdst_buf = (Sample*)lmAlloc(gResamplerAllocator, m_resample_dst_x * sizeof(Sample))) == NULL)
    {
       m_status = STATUS_OUT_OF_MEMORY;
       return;
@@ -1154,7 +1157,7 @@ Resampler::Resampler(int src_x, int src_y,
       for (j = 0; j < m_Pclist_y[i].n; j++)
          m_Psrc_y_count[resampler_range_check(m_Pclist_y[i].p[j].pixel, m_resample_src_y)]++;
 
-   if ((m_Pscan_buf = (Scan_Buf*)malloc(sizeof(Scan_Buf))) == NULL)
+   if ((m_Pscan_buf = (Scan_Buf*)lmAlloc(gResamplerAllocator, sizeof(Scan_Buf))) == NULL)
    {
       m_status = STATUS_OUT_OF_MEMORY;
       return;
@@ -1211,7 +1214,7 @@ Resampler::Resampler(int src_x, int src_y,
 
    if (m_delay_x_resample)
    {
-      if ((m_Ptmp_buf = (Sample*)malloc(m_intermediate_x * sizeof(Sample))) == NULL)
+      if ((m_Ptmp_buf = (Sample*)lmAlloc(gResamplerAllocator, m_intermediate_x * sizeof(Sample))) == NULL)
       {
          m_status = STATUS_OUT_OF_MEMORY;
          return;
