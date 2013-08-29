@@ -213,7 +213,7 @@ package loom2d.animation
                 }
             }
             
-            if (carryOverTime) 
+            if (carryOverTime)
                 advanceTime(carryOverTime);
         }
         
