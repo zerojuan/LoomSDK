@@ -28,7 +28,7 @@
 #include "utCommon.h"
 #include "utTypes.h"
 #include <stdlib.h> // malloc, realloc, size_t - NOTE: Moved to .h from .cpp for Android compilation
-#include <string>
+//#include <string>
 
 #define utStrlen    strlen
 #define utStrcpy    strncpy
