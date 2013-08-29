@@ -171,7 +171,7 @@ struct loom_asset_t
       // Swap in a new blob.
       if(blob)
          blob->decRef();
-      blob = new loom_assetBlob_t();
+      blob = lmNew(gAssetAllocator) loom_assetBlob_t();
       blob->incRef();
 
       blob->bits = bits;
