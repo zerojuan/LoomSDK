@@ -73,8 +73,18 @@ void *lmAlloc_inner(loom_allocator_t *allocator, size_t size, const char *file, 
     return obj;
 }
 
+void * lmCalloc_inner( loom_allocator_t *allocator, size_t count, size_t size, const char *file, int line )
+{
+   void *obj = NULL;
+   if(!allocator) allocator = loom_allocator_getGlobalHeap();
+   
+   obj = allocator->allocCall(allocator, size * count, file, line);
+   memset(obj, 0, size * count);
+   tmAllocEx(gTelemetryContext, file, line, obj, size, "lmAlloc");
+   return obj;
+}
 
-void lmFree_inner(loom_allocator_t *allocator, void *ptr, const char *file, int line)
+void lmFree_inner( loom_allocator_t *allocator, void *ptr, const char *file, int line )
 {
     if (!allocator)
     {
