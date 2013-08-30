@@ -276,7 +276,6 @@ void NativeInterface::managedPointerReleased(void* entry, int version)
     lua_State **statePtr = handleEntryToLuaState.get(entry);
     if (!statePtr)
         return;
-    }
 
     lua_State *L = *statePtr;
 

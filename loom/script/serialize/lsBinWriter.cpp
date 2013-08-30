@@ -31,9 +31,6 @@ utHashTable<utHashedString, int>         BinWriter::stringPool;
 utHashTable<utHashedString, BinWriter *> BinWriter::binWriters;
 
 loom_allocator_t *gBinWriterAllocator = NULL;
-    
-utHashTable<utHashedString, int> BinWriter::stringPool;
-utHashTable<utHashedString, BinWriter*> BinWriter::binWriters;
 
 void BinWriter::writeMemberInfo(json_t* jminfo) {
 
@@ -772,4 +769,5 @@ void BinWriter::writeExecutable(const char *path, json_t *sjson)
     binStream.close();
 
     lmFree(gBinWriterAllocator, compressed);
+}
 }

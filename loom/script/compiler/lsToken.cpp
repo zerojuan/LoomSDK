@@ -48,6 +48,10 @@ Token::Token(TokenType t, const char *value, const char *preAlias)
 
 Token::Token(TokenType t, const utString &input, int start, int end) 
 {
+    type = t;
+
+    //utHashedString svalue(input.substr(start, end - start));
+    
     //if (sAllValues.find(svalue.hash()) == UT_NPOS)
     //    sAllValues.insert(svalue.hash(), svalue);
 

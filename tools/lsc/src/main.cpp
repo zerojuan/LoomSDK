@@ -39,8 +39,6 @@ extern "C" {
 void stringtable_initialize();
 }
 
-#include "jemalloc/jemalloc.h"
-
 #if LOOM_PLATFORM == LOOM_PLATFORM_OSX
 #include <unistd.h>
 #include <mach-o/dyld.h> /* _NSGetExecutablePath */

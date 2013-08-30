@@ -74,11 +74,7 @@ void LSMapFile(const char *path, void **outPointer, long *outSize)
     }
 
     // TODO: external memory API, woot
-<<<<<<< HEAD
-    char *buffer = (char *)malloc(sz);
-=======
     char* buffer = (char *) lmAlloc(gScriptFileAllocator, sz);
->>>>>>> Converted malloc/free to lmAlloc/lmFree.
     fs.read(buffer, sz);
 
     *outPointer = buffer;
@@ -125,13 +121,8 @@ void LSUnmapFile(const char *ptr)
             continue;
         }
 
-<<<<<<< HEAD
-        free(notes[i].ptr);
-        notes[i].ptr     = NULL;
-=======
         lmFree(gScriptFileAllocator, notes[i].ptr);
         notes[i].ptr = NULL;
->>>>>>> Converted malloc/free to lmAlloc/lmFree.
         notes[i].path[0] = 0;
         foundSlot        = true;
         break;

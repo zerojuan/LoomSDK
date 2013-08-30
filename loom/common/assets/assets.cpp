@@ -589,26 +589,19 @@ public:
                    }
 
                    lmLogWarn(gAssetLogGroup, "Applying new version of '%s', %d bytes.", pendingFilePath.c_str(), pendingFileLength);
-                   void *assetBits = loom_asset_deserializeAsset(pendingFilePath.c_str(), assetType, pendingFileLength, (void *)pendingFile);
-                   asset->instate(assetType, assetBits);
+                   LoomAssetCleanupCallback dtor = NULL;
+                   void *assetBits = loom_asset_deserializeAsset(pendingFilePath.c_str(), assetType, pendingFileLength, (void *)pendingFile, &dtor);
+                   asset->instate(assetType, assetBits, dtor);
 
                    // And wipe the pending date.
                    wipePendingData();
                }
-
-            lmLogWarn(gAssetLogGroup, "Applying new version of '%s', %d bytes.", pendingFilePath.c_str(), pendingFileLength);
-            LoomAssetCleanupCallback dtor = NULL;
-            void *assetBits = loom_asset_deserializeAsset(pendingFilePath.c_str(), assetType, pendingFileLength, (void*)pendingFile, &dtor);
-            asset->instate(assetType, assetBits, dtor);
-
-            // And wipe the pending date.
-            wipePendingData();
          }
 
          return true;
       }
 
-        return false;
+    return false;
     }
 };
 
@@ -1095,14 +1088,6 @@ void loom_asset_supply(const char *name, void *bits, int length)
         return;
     }
 
-<<<<<<< HEAD
-    // Deserialize it.
-    void *assetBits = loom_asset_deserializeAsset(name, type, length, bits);
-
-    // Instate the asset.
-    // TODO: We can save some memory by pointing directly and not making a copy.
-    asset->instate(type, assetBits);
-=======
    // Deserialize it.
     LoomAssetCleanupCallback dtor = NULL;
    void *assetBits = loom_asset_deserializeAsset(name, type, length, bits, &dtor);
@@ -1110,7 +1095,6 @@ void loom_asset_supply(const char *name, void *bits, int length)
    // Instate the asset.
    // TODO: We can save some memory by pointing directly and not making a copy.
    asset->instate(type, assetBits, dtor);
->>>>>>> Now leaking much less memory when working with images. Fixed a crash in BFTE. Optimized some tween math.
 
     // Note it's supplied so we don't flush it.
     asset->isSupplied = 1;
