@@ -5,7 +5,10 @@ extern "C" {
 #endif
 
 #include <limits.h>
+
+#ifndef _WIN32
 #include <strings.h>
+#endif
 
 #define	JEMALLOC_VERSION "3.3.1-0-g9ef9d9e8c271cdf14f664b871a8f98c827714784"
 #define	JEMALLOC_VERSION_MAJOR 3
