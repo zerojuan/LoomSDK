@@ -68,7 +68,7 @@ void loom_tick()
     while (platform_getMilliseconds() - startTime > 8)
     {
         // GC till we finish a cycle, then abort.
-        if (lua_gc(LoomApplication::getRootVM()->VM(), LUA_GCSTEP, 0) == 1)
+        if (lua_gc(LoomApplication::getRootVM()->VM(), LUA_GCSTEP, 4) == 1)
         {
             break;
         }

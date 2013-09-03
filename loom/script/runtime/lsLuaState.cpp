@@ -21,6 +21,7 @@
 
 #include "zlib.h"
 
+#include "loom/common/core/allocator.h"
 #include "loom/common/core/assert.h"
 #include "loom/common/utils/utByteArray.h"
 #include "loom/common/platform/platformIO.h"
@@ -69,15 +70,15 @@ static void *lsLuaAlloc(void *ud, void *ptr, size_t osize, size_t nsize)
     (void)ud;  (void)osize;  /* not used */
     if (nsize == 0 && ptr) 
     {
-        je_free(ptr);
+        lmFree(NULL, ptr);
         return NULL;
     }
     else
     {
         if(osize == 0)
-            return je_malloc(nsize);
+            return lmAlloc(NULL, nsize);
         else
-            return je_realloc(ptr, nsize);
+            return lmRealloc(NULL, ptr, nsize);
     }
 }
 

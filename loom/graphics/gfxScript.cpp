@@ -231,14 +231,15 @@ static int __stdcall scaleImageOnDisk_body(void *param)
 
     lmLog(gGFXTextureLogGroup, "Resample took %dms", t2 - platform_getMilliseconds());
 
+    // Release the image, we are done with it!
+    loom_asset_unlock(inPath);
+
     // Write it back out.
     int t3 = platform_getMilliseconds();
     jpge::compress_image_to_jpeg_file(outPath, outWidth, outHeight, 3, outBuffer);
     lmLog(gGFXTextureLogGroup, "JPEG output took %dms", t3 - platform_getMilliseconds());
 
     // Free everything!
-    loom_asset_unlock(inPath);
-
     lmFree(gRescalerAllocator, buffRed);
     lmFree(gRescalerAllocator, buffGreen);
     lmFree(gRescalerAllocator, buffBlue);

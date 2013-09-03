@@ -130,21 +130,33 @@ void loom_allocator_destroy(loom_allocator_t *allocator)
 
 // ----------- DEFAULT CRT HEAP ALLOCATOR ---------------------------------------------
 
+#define USE_JEMALLOC 0
+
 static void *loom_heapAlloc_alloc(loom_allocator_t *thiz, size_t size, const char *file, int line)
 {
+#if USE_JEMALLOC == 1
    return je_malloc(size);
+#else
+   return malloc(size);
+#endif
 }
-
 
 static void loom_heapAlloc_free(loom_allocator_t *thiz, void *ptr, const char *file, int line)
 {
+#if USE_JEMALLOC == 1
    je_free(ptr);
+#else
+   free(ptr);
+#endif
 }
-
 
 static void *loom_heapAlloc_realloc(loom_allocator_t *thiz, void *ptr, size_t size, const char *file, int line)
 {
+#if USE_JEMALLOC == 1
    return je_realloc(ptr, size);
+#else
+   return realloc(ptr, size);
+#endif
 }
 
 
