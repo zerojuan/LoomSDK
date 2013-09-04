@@ -34,6 +34,8 @@
 // fore/back.
 #define LOOM_ALLOCATOR_ALIGNMENT    16
 
+#define USE_JEMALLOC 1
+ 
 static loom_allocator_t gGlobalHeap;
 static int              heap_allocated = 0;
 
@@ -129,8 +131,6 @@ void loom_allocator_destroy(loom_allocator_t *allocator)
 
 
 // ----------- DEFAULT CRT HEAP ALLOCATOR ---------------------------------------------
-
-#define USE_JEMALLOC 0
 
 static void *loom_heapAlloc_alloc(loom_allocator_t *thiz, size_t size, const char *file, int line)
 {
