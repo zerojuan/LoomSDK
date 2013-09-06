@@ -90,7 +90,8 @@ package loom2d.display
         {
             for (var i:int=mChildren.length-1; i>=0; --i)
                 mChildren[i].dispose();
-            
+            mChildren.length = 0;
+             
             super.dispose();
         }
         
